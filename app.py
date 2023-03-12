@@ -18,6 +18,7 @@ app = FastAPI()
 async def home():
   return "server running!"
 
+@app.post("/text2image")
 async def inference(model_inputs:dict) -> dict:
     global model
     try:
