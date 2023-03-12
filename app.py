@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import torch
 from io import BytesIO
 import base64
+from pydantic import BaseModel
 # Importing some useful pipelines
 from diffusers import StableDiffusionPipeline 
 device = (
@@ -11,6 +12,8 @@ device = (
     if torch.cuda.is_available()
     else "cpu"
 )
+class model_params(BaseModel):
+    prompt: str
 
 app = FastAPI()
 
@@ -19,7 +22,7 @@ async def home():
   return "server running!"
 
 @app.post("/text2image")
-async def inference(model_inputs:dict) -> dict:
+async def inference(model_inputs:model_params) -> dict:
     global model
     try:
       model = StableDiffusionPipeline.from_pretrained("model")
@@ -36,7 +39,7 @@ async def inference(model_inputs:dict) -> dict:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
     # Run the pipeline, showing some of the available arguments
     pipe_output = model(
-        prompt=model_inputs.get('prompt', None), # What to generate
+        prompt = model_inputs.get('prompt', None), # What to generate
         negative_prompt="Oversaturated, blurry, low quality", # What NOT to generate
         height=480, width=640,     # Specify the image size
         guidance_scale=12,          # How strongly to follow the prompt
